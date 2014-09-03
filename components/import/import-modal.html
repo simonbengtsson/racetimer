@@ -1,0 +1,50 @@
+<div id="import-modal">
+    <div class="modal-header">
+        <button type="button" class="close" ng-click="cancel()">&times;</button>
+        <h4 class="modal-title">Importera</h4>
+    </div>
+    <div class="modal-body">
+        <p>
+            Importera deltagare genom att välja en <strong>CSV</strong> fil nedan. Enklast skapas en
+            sådan fil i till exempel Excel eller
+            <a target="blank" href="http://www.google.com/intl/sv/sheets/about/">Google Kalkylark</a>.
+            Första raden ska innehålla rubriker.
+        </p>
+
+        <div class="file-upload-area" ng-file-drop="onFileSelect($files)" ng-file-drag-over-class="drag-over">
+            <span class="glyphicon glyphicon-file"></span>
+            <span>Dra fil hit <em style="margin: 0 5px;">eller</em> </span>
+            <button class="btn btn-default" ng-file-select="onFileSelect($files)">Välj csv fil</button>
+        </div>
+
+        <dl class="dl-horizontal well">
+            <dt>Fil:</dt>
+            <dd>{{ modal.fileInfo || 'Ingen fil vald' }}</dd>
+            <dt>Kolumner:</dt>
+            <dd>{{ modal.headers.join(', ') || '-'}}</dd>
+            <dt>Antal deltagare:</dt>
+            <dd>{{ modal.pts.length || '-' }}</dd>
+            <dt><label for="id-selector">ID kolumn:</label></dt>
+            <dd>
+            <span ng-show="modal.pts.length">
+                <select id="id-selector" ng-options="header for header in modal.headers" ng-model="modal.ptId"></select>
+                <span class="help-text">Tex startnummer, ordningsnummer etc</span>
+            </span>
+                <span ng-hide="modal.pts.length">-</span>
+            </dd>
+            <dt><label for="long-id-selector">Beskrivande kolumn:</label></dt>
+            <dd>
+            <span ng-show="modal.pts.length">
+                <select id="long-id-selector" ng-options="header for header in modal.headers" ng-model="modal.ptDesc"></select>
+                <span class="help-text">Tex namn, lagnamn etc</span>
+            </span>
+                <span ng-hide="modal.pts.length">-</span>
+            </dd>
+        </dl>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="cancel()">Stäng</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="makeImport()">Importera
+        </button>
+    </div>
+</div>

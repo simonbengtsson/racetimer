@@ -1,0 +1,19 @@
+<div id="reg-modal">
+    <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()">&times;</button>
+        <h4 class="modal-title">Skapa anmälningsformulär</h4>
+    </div>
+    <div class="modal-body">
+        <p>
+            För att slippa skriva in alla deltagare manuellt kan <a href="http://forms.google.com">Google Formulär</a> användas.
+            Då kan användarna själva skriva in sina uppgifter som sedan kan importeras i programmet.
+        </p>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-default" data-dismiss="modal" ng-click="$dismiss()">Stäng</button>
+        <a href="http://forms.google.com" class="btn btn-primary" target="blank" ng-click="$close()">
+            <span class="glyphicon glyphicon-new-window"></span>
+            Gå till Google Formulär
+        </a>
+    </div>
+</div>

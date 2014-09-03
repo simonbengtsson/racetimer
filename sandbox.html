@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Library uses new Function() which is only allowed in sandbox -->
+    <script src="bower_components/comma-separated-values/csv.js"></script>
+    <script src="global.js"></script>
+
+</head>
+<body>
+
+<script>
+
+
+    (function () {
+
+        var CsvHelper = new function () {
+
+            /**
+             * Detects and returns used line ending
+             * @param data The raw data string
+             * @return '\r\n', '\r' or '\n'
+             */
+            this.detectLineEnding = function (data) {
+                if (Utils.strCount('\r\n', data) > 0) {
+                    return '\r\n'; // Windows
+                } else if (Utils.strCount('\r', data) > 0) {
+                    return '\r'; // Old mac
+                } else {
+                    return '\n'; // Unix/Mac
+                }
+            };
+
+            /**
+             * Detects and returns used value delimiter
+             * @param lines Array with raw strings
+             * @return ';', ',' or '\t'
+             */
+            this.detectValueDelimiter = function (lines) {
+                var chars = [';', '\t'];
+                for (var i = 0; i < chars.length; i++) {
+                    if (testChar(chars[i]))
+                        return chars[i];
+                }
+                return ',';
+
+                function testChar(c) {
+                    var first = Utils.strCount(c, lines[0]);
+                    if (first === 0)
+                        return false;
+                    for (var i = 1; i < lines.length; i++) {
+                        var count = Utils.strCount(c, lines[i]);
+                        if (count !== first)
+                            return false;
+                    }
+                    return true;
+                }
+            };
+
+            /**
+             * Discards empty lines
+             * @param lines
+             * @param delimiter
+             */
+            this.discardEmptyLines = function (lines, delimiter) {
+
+                var regex = new RegExp('[' + delimiter + ']+', 'g');
+                // Reverse order to not mess up indexes
+                for (var i = lines.length - 1; i >= 0; i--) {
+                    if (!lines[i].replace(regex, '')) {
+                        lines.splice(i, 1);
+                    }
+                }
+
+                return lines;
+            };
+
+            /**
+             * Discards empty columns
+             * @param parsedData
+             */
+            this.discardEmptyColumns = function (parsedData) {
+
+                var emptyColumns = [];
+                var headers = parsedData[0];
+                headers.forEach(function (header, index) {
+                    if (!header)
+                        emptyColumns.push(index);
+                });
+
+                var newData = [];
+                parsedData.forEach(function (line, index, arr) {
+                    for (var i = emptyColumns.length - 1; i >= 0; i--) {
+                        line.splice(emptyColumns[i], 1);
+                    }
+                    newData.push(line);
+                });
+
+                return newData;
+            };
+
+        };
+
+        window.addEventListener('message', function (event) {
+            var eol = CsvHelper.detectLineEnding(event.data);
+            var lines = event.data.split(eol);
+
+            if(!event.data || lines.length < 2) {
+                event.source.postMessage({success: false, message: 'Data error'}, event.origin);
+                return;
+            }
+
+            var delimiter = CsvHelper.detectValueDelimiter(lines);
+            lines = CsvHelper.discardEmptyLines(lines, delimiter);
+
+            var knrzCsv = new CSV(lines.join(eol), {
+                line: eol,
+                delimiter: delimiter
+            });
+
+            var parsedData = knrzCsv.parse();
+            parsedData = CsvHelper.discardEmptyColumns(parsedData);
+            event.source.postMessage({success: true, data: parsedData}, event.origin);
+        });
+
+    })();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,113 @@
+<header class="main-header">
+    <h1>
+        <span class="glyphicon glyphicon-time"></span>
+        Sport Stopwatch
+    </h1>
+
+    <ul class="actions">
+
+        <li>
+            <input type="search" class="search data-table-search" placeholder="Sök">
+        </li>
+
+        <li>
+            <a href="#" class="btn-action" ng-click="createPdf('start-list')">
+                <span class="glyphicon glyphicon-list-alt"></span>
+                Startlista
+            </a>
+        </li>
+
+        <li>
+            <a href="#" class="btn-action" ng-click="createPdf('results')">
+                <span class="glyphicon glyphicon-star"></span>
+                Resultat
+            </a>
+        </li>
+
+        <li class="dropdown">
+            <a href="#" data-toggle="dropdown" class="btn-action">
+                Mer
+                <span class="caret"></span>
+            </a>
+
+            <ul class="dropdown-menu pull-right">
+                <li>
+                    <a tabindex="-1" href="#" ng-click="openImport()">
+                        <span class="glyphicon glyphicon-import"></span>
+                        Importera deltagare
+                        <span class="keyboard-shortcut">ctrl I</span>
+                    </a>
+                </li>
+                <li>
+                    <a tabindex="-1" ng-click="openModal('reg-modal.html')">
+                        <span class="glyphicon glyphicon-pencil"></span>
+                        Skapa anmälningsformulär
+                    </a>
+                </li>
+                <li>
+                    <a tabindex="-1" ng-click="openModal('about-modal.html')">
+                        Om...
+                    </a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</header>
+
+<div class="main-content">
+    <aside class="sidebar">
+        <section>
+            <h4>Rapportering</h4>
+
+            <p>Nuvarande tid är
+                <es-time format="HH:mm:ss"></es-time>
+            </p>
+            <st-rep-input button="true" submit="addResult(data)" submit-without-pt="addWithoutPt()"></st-rep-input>
+        </section>
+        <section>
+            <h4>Senaste</h4>
+            <ul class="latest-laps-list list-reset">
+                <li ng-repeat="obj in latest track by $index">
+                    <div ng-if="obj.pt" class="time">
+                        {{ obj.lap | date: 'HH:mm:ss' }} - {{ obj.pt.id }} {{ obj.pt.desc }}
+                    </div>
+                    <div ng-if="!obj.pt">
+                        <span class="time">{{ obj.lap | date: 'HH:mm:ss' }} </span>
+                        <st-rep-input submit="addResult(data)" latest-index="$index"></st-rep-input>
+                        <span class="glyphicon glyphicon-remove-circle result-without-driver-remove"
+                              ng-click="removeLatest($index)"></span>
+                    </div>
+                </li>
+            </ul>
+        </section>
+    </aside>
+    <section class="main-section">
+        <table id="pt-table" class="table table-striped table-condensed drivers-table">
+            <thead>
+            <tr>
+                <th>Plac</th>
+                <th ng-bind="comp.ptId"></th>
+                <th ng-bind="comp.ptDesc"></th>
+                <th ng-repeat="info in comp.ptInfoArr">{{ info }}</th>
+                <th ng-repeat="lapInfo in comp.lapInfoArr">{{lapInfo.title}}</th>
+                <th>Total</th>
+            </tr>
+            </thead>
+            <tr ng-repeat="pt in comp.drivers | orderBy : 'plac' track by $index">
+                <td>{{ calcPlac(pt) }}</td>
+                <td>{{ pt.id }}</td>
+                <td>{{ pt.desc }}</td>
+                <td ng-repeat="info in comp.ptInfoArr">{{ pt.info[$index] }}</td>
+                <td ng-repeat="lapInfo in comp.lapInfoArr">{{ pt.getLapTime($index) || '' }}</td>
+                <td>{{ pt.getTotal() }}</td>
+            </tr>
+        </table>
+        <p ng-if="false" class="table-info">Antal förare: {{ drivers.length }}</p>
+        <h5 class="no-drivers-msg" ng-if="drivers.length === 0">
+            Inga förare tillagda.
+            <a href="#" data-target="#import-modal" data-toggle="modal">Lägg till</a>
+        </h5>
+    </section>
+</div>
+
+<iframe id="sandbox-frame" src="sandbox.html" style="display: none;"></iframe>

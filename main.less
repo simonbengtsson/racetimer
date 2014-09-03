@@ -1,0 +1,334 @@
+html, body {
+  height: 100%;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  height: 100%
+}
+
+@header-height: 50px;
+
+.main-header {
+  background: #e74c3c;
+  height: @header-height;
+  position: relative;
+  padding: 0 10px;
+
+  h1 {
+    line-height: @header-height;
+    color: #fff;
+    margin: 0;
+    font-size: 22px;
+  }
+
+  .actions {
+    position: absolute;
+    right: 10px;
+    top: 0;
+    height: 100%;
+    list-style: none;
+    padding-left: 0;
+
+    > li {
+      float: left;
+    }
+
+    .keyboard-shortcut {
+      float: right;
+      color: #aaa;
+    }
+
+    .search {
+      outline: none;
+      border-radius: 15px;
+      margin: 10px;
+      margin-top: 12px;
+      padding: 2px 15px;
+      width: 150px;
+      border: none;
+    }
+
+    .btn-action {
+      color: #fff;
+      padding: 0 10px;
+      display: inline-block;
+      line-height: @header-height;
+      font-size: 14px;
+      text-decoration: none;
+    }
+
+    .btn-action:hover, .btn-action:focus, .btn-action > a:focus {
+      background: #c0392b;
+      outline: none;
+    }
+
+    .dropdown-menu {
+      border-top: 0;
+      margin: 0;
+      border-radius: 0;
+
+      a:focus {
+        outline: 0;
+      }
+    }
+  }
+}
+
+.main-content {
+  display: flex;
+  flex: 1;
+
+  .main-section {
+    flex: 1;
+    overflow-y: scroll;
+  }
+
+  .drivers-table {
+    margin-bottom: 0;
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  .no-drivers-msg {
+    font-weight: 200;
+    font-size: 20px;
+    text-align: center;
+    color: #777;
+    margin-top: 30px;
+  }
+
+  .table-info {
+    text-align: center;
+    float: none;
+    font-weight: bold;
+    color: #777;
+    font-size: 12px;
+    padding: 5px;
+  }
+}
+
+.sidebar {
+  width: 250px;
+  background: #eee;
+  border-right: 1px solid #ddd;
+
+  h4 {
+    font-weight: 200;
+    font-size: 22px;
+    color: #777;
+    margin-bottom: 5px;
+  }
+
+  p {
+    color: #777;
+    font-weight: 500;
+  }
+
+  section {
+    margin: 20px 10px;
+  }
+
+  .st-rep-form {
+    display: inline-block;
+  }
+
+  .search {
+    width: 100px;
+    height: 30px;
+    padding: 5px 10px;
+    font-size: 16px;
+  }
+
+  .btn-search {
+    min-width: 60px;
+    font-size: 13px;
+    height: 30px;
+    margin-left: 5px;
+    vertical-align: top;
+  }
+
+  .latest-laps-list {
+
+    li {
+      padding: 2px 0;
+    }
+
+    span {
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .time {
+      font-size: 14px;
+      color: #777;
+    }
+
+    .search {
+      width: 80px;
+      height: auto;
+      padding: 2px 5px;
+      font-size: 12px;
+    }
+
+    .st-rep-form {
+      padding-left: 5px;
+    }
+
+    li:hover .result-without-driver-remove {
+      display: inline-block;
+    }
+
+    .result-without-driver-remove {
+      color: #aaa;
+      display: none;
+      padding: 5px;
+      float: right;
+      cursor: pointer;
+    }
+
+    .result-without-driver-remove:hover {
+      color: #555;
+    }
+
+  }
+}
+
+.modal {
+
+  .modal-content {
+    border-radius: 0;
+    padding: 10px 30px;
+
+    h4 {
+      font-size: 26px;
+      font-weight: 200;
+    }
+
+    .well {
+      margin-bottom: 10px;
+      border: 0;
+      border-left: 5px solid #428bca;
+      margin-top: 20px;
+      border-radius: 0px;
+    }
+  }
+
+  .modal-body, .modal-header, .modal-footer {
+    padding: 15px 0;
+  }
+
+  .modal-header {
+    padding-bottom: 10px;
+  }
+
+}
+
+.file-upload-area {
+  border: #eee 4px dashed;
+  padding: 10px 20px;
+  font-size: 18px;
+  font-weight: 200;
+  color: #777;
+
+  .glyphicon {
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  span {
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .file-chooser-info {
+    font-weight: bold;
+    color: #777;
+    padding-left: 5px;
+    font-size: 14px;
+  }
+}
+
+.file-upload-area.drag-over {
+  border-color: #428bca;
+}
+
+.btn {
+  border-radius: 0;
+}
+
+.table-striped > tbody > tr:nth-child(odd) > td {
+  background: #f0f5f9;
+}
+
+.dl-horizontal dt {
+  float: left;
+  width: 170px;
+  overflow: hidden;
+  clear: left;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 1px 0;
+}
+
+.dl-horizontal dd {
+  margin-left: 170px;
+  padding: 1px 0;
+}
+
+#import-modal {
+  .help-text {
+    color: #777;
+    font-style: italic;
+    font-size: 12px;
+  }
+}
+
+button, .btn:focus, .btn:active:focus, .btn.active:focus, a:focus, input {
+  outline: 0;
+}
+
+input:focus {
+  outline: none;
+  border-bottom: 2px solid #428bca;
+}
+
+input {
+  border: none;
+  border-bottom: 2px #aaa solid;
+  padding: 3px 7px;
+}
+
+input.invalid {
+  border-bottom: 2px solid darkred;
+}
+
+.combo-box {
+  display: inline-block;
+  position: relative;
+
+  ul {
+    background: #acf;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+  }
+}
+
+.list-reset {
+  padding-left: 0;
+  list-style: none;
+}
+
+.cfp-hotkeys-close {
+  background: none !important;
+  border: none;
+}
+
+a {
+  cursor: pointer;
+}

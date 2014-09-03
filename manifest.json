@@ -1,0 +1,20 @@
+{
+    "name": "Enduro Stopwatch",
+    "description": "A stopwatch mainly for Enduro",
+    "version": "0.0.1",
+    "manifest_version": 2,
+    "permissions": [
+        {
+            "fileSystem": ["write", "retainEntries", "directory"]
+        },
+        "storage"
+    ],
+    "app": {
+        "background": {
+            "scripts": ["background.js"]
+        }
+    },
+    "sandbox": {
+        "pages": ["sandbox.html"]
+    }
+}
