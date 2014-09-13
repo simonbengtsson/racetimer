@@ -1,0 +1,27 @@
+<div id="pt-modal" class="modal-cont">
+    <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()" tabindex="-1">&times;</button>
+        <h4 class="modal-title">Varv information</h4>
+    </div>
+    <form novalidate>
+        <div class="modal-body">
+            <div class="row">
+
+                <div class="col-md-12">
+                    <h5>Varv</h5>
+
+                    <div ng-repeat="lapInfo in comp.lapInfoArr">
+                        <input step="1" ng-model="lapInfo.title" placeholder="">
+                    </div>
+                    <span ng-show="comp.lapInfoArr.length === 0">Inga varv skapade.</span>
+                    <a href="#" ng-click="comp.addLapInfo()">Lägg till</a>
+                </div>
+            </div>
+
+        </div>
+        <div class="modal-footer">
+            <em style="margin-right: 5px;">Ändringar autosparas</em>
+            <button type="submit" class="btn btn-default" ng-click="$close()">Stäng</button>
+        </div>
+    </form>
+</div>

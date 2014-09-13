@@ -28,23 +28,23 @@
             <dd>
             <span ng-show="modal.pts.length">
                 <select id="id-selector" ng-options="header for header in modal.headers" ng-model="modal.ptId"></select>
-                <span class="help-text">Tex startnummer, ordningsnummer etc</span>
+                <span class="help-text">Tex startnummer eller ordningsnummer</span>
             </span>
                 <span ng-hide="modal.pts.length">-</span>
             </dd>
             <dt><label for="long-id-selector">Beskrivande kolumn:</label></dt>
             <dd>
             <span ng-show="modal.pts.length">
-                <select id="long-id-selector" ng-options="header for header in modal.headers" ng-model="modal.ptDesc"></select>
-                <span class="help-text">Tex namn, lagnamn etc</span>
+                <select id="long-id-selector" ng-options="header for header in modal.headers"
+                        ng-model="modal.ptDesc"></select>
+                <span class="help-text">Tex namn eller lagnamn</span>
             </span>
                 <span ng-hide="modal.pts.length">-</span>
             </dd>
         </dl>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="cancel()">Stäng</button>
-        <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="makeImport()">Importera
-        </button>
+        <button type="button" class="btn btn-default" ng-click="cancel()">Stäng</button>
+        <button type="button" class="btn btn-primary" ng-click="makeImport()">Importera</button>
     </div>
 </div>

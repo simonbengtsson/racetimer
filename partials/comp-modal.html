@@ -1,0 +1,26 @@
+<div id="comp-modal">
+    <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()" tabindex="-1">&times;</button>
+        <h4 class="modal-title">Tävling</h4>
+    </div>
+    <form>
+    <div class="modal-body">
+            <div ng-if="type === 'name'">
+                <label for="name">Namn</label>
+                <input id="name" ng-model="info.name" focus-me>
+            </div>
+            <div ng-if="type === 'startTime'">
+                <label class="date-label" for="date">Datum</label>
+                <input type="date" id="date" ng-model="info.date">
+            </div>
+            <div ng-if="type === 'startTime'">
+                <label class="date-label" for="time">Tid</label>
+                <input type="time" step="1" id="time" ng-model="info.time">
+            </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="$dismiss()">Stäng</button>
+        <button type="submit" class="btn btn-primary" ng-click="save()">Spara</button>
+    </div>
+    </form>
+</div>

@@ -8,16 +8,33 @@ stApp.config(function (hotkeysProvider) {
 
 stApp.controller('MainController', ['$scope', 'competition', '$modal', '$log', 'hotkeys', 'pdfgen', function ($scope, competition, $modal, $log, hotkeys, pdfgen) {
 
-    const MAX_LATEST = 15;
+    var MAX_LATEST = 15;
 
     var comp = competition;
     $scope.comp = competition;
+
+    $scope.reverse = false;
+    $scope.sortColumn = 'plac';
+
+    $scope.changeSort = function (sc) {
+        $scope.reverse = !$scope.reverse;
+        $scope.sortColumn = sc;
+    };
 
     hotkeys.add({
         combo: ['ctrl+I', 'command+i'],
         description: 'Öppnar import dialog',
         callback: function () {
             $scope.openImport();
+        }
+    });
+
+    hotkeys.add({
+        combo: ['ctrl+B'],
+        description: 'Säkerhetskopiera tävling',
+        callback: function () {
+            console.log('sdf');
+            comp.saveToFile();
         }
     });
 
@@ -31,11 +48,11 @@ stApp.controller('MainController', ['$scope', 'competition', '$modal', '$log', '
         if (pt.laps.length === 0)
             return '';
         var plac = 1;
-        comp.drivers.forEach(function (other) {
+        comp.pts.forEach(function (other) {
             if (pt.laps.length < other.laps.length) {
                 plac++;
             } else if (pt.laps.length === other.laps.length) {
-                var timeDiff = pt.laps[pt.laps.length - 1] - other.laps[other.laps.length - 1];
+                var timeDiff = pt.laps[pt.laps.length - 1].time - other.laps[other.laps.length - 1].time;
                 if (timeDiff > 0) {
                     plac++;
                 }
@@ -46,15 +63,15 @@ stApp.controller('MainController', ['$scope', 'competition', '$modal', '$log', '
     };
 
     /**
-     *
      * @param {Object} data Format is {pt: pt, latestIndex: int}
      */
     $scope.addResult = function (data) {
         var time = new Date();
 
         if (data.latestIndex !== undefined) {
-            time = $scope.latest[data.latestIndex].time;
+            time = $scope.latest[data.latestIndex].lap;
             $scope.latest[data.latestIndex].pt = data.pt;
+            comp.addLap(data.pt, time);
         } else {
             comp.addLap(data.pt, time);
             $scope.latest.unshift({lap: time, pt: data.pt});
@@ -77,32 +94,121 @@ stApp.controller('MainController', ['$scope', 'competition', '$modal', '$log', '
 
     $scope.openImport = function () {
         $modal.open({
-            templateUrl: 'components/import/import-modal.html',
+            templateUrl: 'partials/import-modal.html',
             controller: ['$scope', '$modalInstance', 'competition', ImportCtrl],
             size: 'lg'
         });
     };
 
-    $scope.createPdf = function(type) {
-        switch(type) {
+    $scope.openLapInfoModal = function () {
+        $modal.open({
+            templateUrl: 'partials/lap-info-modal.html',
+            controller: ['$scope', '$modalInstance', 'competition', function ($scope) {
+                $scope.comp = comp;
+            }]
+        });
+    };
+
+    $scope.openPtModal = function (pt, newPt) {
+        $modal.open({
+            templateUrl: 'partials/pt-modal.html',
+            controller: ['$scope', '$modalInstance', 'competition', function ($scope, $modalInstance, comp) {
+                $scope.comp = comp;
+                $scope.newPt = newPt;
+                if (newPt) pt = new comp.Participant("", "", []);
+                $scope.pt = pt;
+                var startSecOffset = pt.startMilliOffset / 1000;
+
+                $scope.times = {};
+                pt.laps.forEach(function (lap) {
+                    $scope.times[lap.lapInfoKey] = new Date(lap.time);
+                });
+
+                $scope.$watch('times', function () {
+                    pt.laps = [];
+                    angular.forEach($scope.times, function (time, key) {
+                        if (time) {
+                            var newTime = new Date(comp.startTime);
+                            newTime.setHours(time.getHours(), time.getMinutes(), time.getSeconds());
+                            var lap = comp.newLap(newTime, key);
+                            pt.laps.push(lap);
+                        } else {
+                            delete $scope.times[key];
+                        }
+                    });
+                }, true);
+
+                $scope.startSecOffset = function (newVal) {
+                    if (arguments.length > 0) {
+                        startSecOffset = (angular.isNumber(newVal) ? newVal : '');
+                        pt.startMilliOffset = startSecOffset * 1000;
+                    }
+                    return startSecOffset;
+                };
+
+                $scope.addLapInfo = function () {
+                    comp.addLapInfo();
+                };
+
+                $scope.saveNewPt = function () {
+                    comp.pts.push(pt);
+                    $modalInstance.close();
+                };
+            }]
+        });
+    };
+
+    $scope.openCompModal = function (type) {
+        $modal.open({
+            templateUrl: 'partials/comp-modal.html',
+            controller: ['$scope', 'competition', '$modalInstance', function ($scope, comp, $modalInstance) {
+                $scope.type = type;
+                $scope.info = {
+                    name: comp.name,
+                    date: comp.startTime,
+                    time: comp.startTime
+                };
+
+                $scope.save = function () {
+                    if ($scope.type === 'name') {
+                        comp.name = $scope.info.name || "Namnlös";
+                        $modalInstance.close();
+                    } else if ($scope.type === 'startTime') {
+                        var date = $scope.info.date || new Date();
+                        var time = $scope.info.time || new Date();
+                        date.setHours(time.getHours(), time.getMinutes(), time.getSeconds());
+                        comp.startTime = date;
+                        $modalInstance.close();
+                    } else {
+                        console.log('Not valid type: ' + $scope.type);
+                    }
+
+                };
+            }]
+        });
+    };
+
+    $scope.createPdf = function (type) {
+        switch (type) {
             case 'start-list':
+                pdfgen.startList();
                 break;
             case 'results':
+                pdfgen.results();
                 break;
             default:
                 console.error('Not supported type: ' + type);
         }
-        pdfgen.create(type);
-        console.log(type);
+
     };
 
-    $scope.openRegModal = function() {
+    $scope.openRegModal = function () {
         $modal.open({
             templateUrl: 'partials/reg-modal.html'
         });
     };
 
-    $scope.openModal = function(partial) {
+    $scope.openModal = function (partial) {
         $modal.open({
             templateUrl: 'partials/' + partial
         });
@@ -181,7 +287,8 @@ stApp.controller('MainController', ['$scope', 'competition', '$modal', '$log', '
         };
     };
 
-}]);
+}])
+;
 
 stApp.directive('esTime', ['$interval', '$filter', function ($interval, $filter) {
 
@@ -224,7 +331,7 @@ stApp.directive('stRepInput', ['$filter', 'competition', function ($filter, comp
             });
 
             scope.localSubmit = function () {
-                if(!scope.reporting.searchTerm) {
+                if (!scope.reporting.searchTerm) {
                     scope.submitWithoutPt();
                 } else {
                     var pt = comp.findPt(scope.reporting.searchTerm);
@@ -256,3 +363,13 @@ stApp.directive('stRepInput', ['$filter', 'competition', function ($filter, comp
         }
     }]
 );
+
+stApp.directive('focusMe', function ($timeout) {
+    return {
+        link: function (scope, element, attrs, model) {
+            $timeout(function () {
+                element[0].focus();
+            });
+        }
+    };
+});

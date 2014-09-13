@@ -7,7 +7,17 @@
     <ul class="actions">
 
         <li>
-            <input type="search" class="search data-table-search" placeholder="Sök">
+            <input type="search" class="search data-table-search" placeholder="Sök" ng-model="searchTerm">
+            <!--<a href="#" class="btn-action" ng-click="openPtModal(null, true)">
+                <span class="glyphicon glyphicon-search"></span>
+            </a>-->
+        </li>
+
+        <li>
+            <a href="#" class="btn-action" ng-click="openPtModal(null, true)">
+                <span class="glyphicon glyphicon-plus"></span>
+                Ny deltagare
+            </a>
         </li>
 
         <li>
@@ -38,6 +48,22 @@
                         <span class="keyboard-shortcut">ctrl I</span>
                     </a>
                 </li>
+                <li ng-click="comp.saveToFile()">
+                    <a tabindex="-1" href="#" id="save-to-file" download="{{ comp.name | slug }}.rwatch">
+                        <span class="glyphicon glyphicon-cloud"></span>
+                        Säkerhetskopiera tävling
+                        <span class="keyboard-shortcut">ctrl S</span>
+                    </a>
+                </li>
+                <!--
+                <li>
+                    <a tabindex="-1" href="#">
+                        <span class="glyphicon glyphicon-open"></span>
+                        Öppna tävling
+                        <span class="keyboard-shortcut">ctrl O</span>
+                    </a>
+                </li>
+                -->
                 <li>
                     <a tabindex="-1" ng-click="openModal('reg-modal.html')">
                         <span class="glyphicon glyphicon-pencil"></span>
@@ -56,6 +82,27 @@
 
 <div class="main-content">
     <aside class="sidebar">
+        <section>
+            <h4>Tävling</h4>
+            <dl class="dl-horizontal">
+                <dt>Namn</dt>
+                <dd class="editable" ng-click="openCompModal('name')">
+                    {{ comp.name }} <span class="glyphicon glyphicon-edit"></span>
+                </dd>
+                <dt>Starttid</dt>
+                <dd class="editable" ng-click="openCompModal('startTime')">
+                    {{ comp.startTime | date:'yyyy-MM-dd HH:mm:ss' }}<span class="glyphicon glyphicon-edit"></span>
+                </dd>
+                <dt>Varv</dt>
+                <dd class="editable" ng-click="openLapInfoModal()">
+                    {{ comp.lapInfoArr.length }}<span class="glyphicon glyphicon-edit"></span>
+                </dd>
+                <dt>Starter</dt>
+                <dd>
+                    {{ comp.getStartGroups() }}
+                </dd>
+            </dl>
+        </section>
         <section>
             <h4>Rapportering</h4>
 
@@ -82,27 +129,40 @@
         </section>
     </aside>
     <section class="main-section">
-        <table id="pt-table" class="table table-striped table-condensed drivers-table">
+        <table id="pt-table" class="table table-striped table-condensed drivers-table clickable-rows">
             <thead>
             <tr>
-                <th>Plac</th>
-                <th ng-bind="comp.ptId"></th>
-                <th ng-bind="comp.ptDesc"></th>
-                <th ng-repeat="info in comp.ptInfoArr">{{ info }}</th>
-                <th ng-repeat="lapInfo in comp.lapInfoArr">{{lapInfo.title}}</th>
-                <th>Total</th>
+                <th ng-click="changeSort('plac')">
+                    Plac
+                    <!--
+                    <span style="font-size: 5px;">
+                        <span>&#9650;</span>
+                        <span>&#9660;</span>
+                    </span>
+                    -->
+                </th>
+                <th ng-bind="comp.ptId" ng-click="changeSort('id')"></th>
+                <th ng-bind="comp.ptDesc" ng-click="changeSort('desc')"></th>
+                <th ng-click="changeSort('getStartTime()')">Start</th>
+                <th ng-repeat="info in comp.ptInfoArr" ng-click="changeSort('info[' + $index + ']')">{{ info }}</th>
+                <th ng-repeat="lapInfo in comp.lapInfoArr" ng-click="changeSort('laps[' + lapInfo.key + '].time')">
+                    {{lapInfo.title}}
+                </th>
+                <th ng-click="changeSort('getTotal()')">Total</th>
             </tr>
             </thead>
-            <tr ng-repeat="pt in comp.drivers | orderBy : 'plac' track by $index">
+            <tr ng-repeat="pt in comp.pts | orderBy : sortColumn : reverse | filter:searchTerm track by $index"
+                ng-click="openPtModal(pt)">
                 <td>{{ calcPlac(pt) }}</td>
                 <td>{{ pt.id }}</td>
                 <td>{{ pt.desc }}</td>
+                <td>{{ pt.getStartTime() | date:'HH:mm:ss' }}</td>
                 <td ng-repeat="info in comp.ptInfoArr">{{ pt.info[$index] }}</td>
                 <td ng-repeat="lapInfo in comp.lapInfoArr">{{ pt.getLapTime($index) || '' }}</td>
                 <td>{{ pt.getTotal() }}</td>
             </tr>
         </table>
-        <p ng-if="false" class="table-info">Antal förare: {{ drivers.length }}</p>
+        <p ng-if="false" class="table-info">Antal förare: {{ comp.pts.length }}</p>
         <h5 class="no-drivers-msg" ng-if="drivers.length === 0">
             Inga förare tillagda.
             <a href="#" data-target="#import-modal" data-toggle="modal">Lägg till</a>

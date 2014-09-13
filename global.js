@@ -50,12 +50,23 @@ var Utils = new function () {
         return number.length >= width ? number : new Array(width - number.length + 1).join(char) + number;
     };
 
-    this.shortcutChar = function(append) {
+    this.deepClone = function (obj) {
+        var dateRegex = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/;
+        var dateParser = function (key, value) {
+            if (typeof value === 'string' && dateRegex.test(value)) {
+                return new Date(value);
+            }
+            return value;
+        };
+        return JSON.parse(JSON.stringify(obj) , dateParser);
+    };
+
+    this.shortcutChar = function (append) {
         append = append || '';
         var pf = window.navigator.platform.toLowerCase();
-        if(pf.indexOf('mac')) {
+        if (pf.indexOf('mac')) {
             return '&#8984;' + append;
-        } else if(pf.indexOf('linux') || pf.indexOf('win')) {
+        } else if (pf.indexOf('linux') || pf.indexOf('win')) {
             return 'Ctrl' + append;
         }
         return '';

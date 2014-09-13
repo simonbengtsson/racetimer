@@ -1,0 +1,57 @@
+<div id="pt-modal" class="modal-cont">
+    <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()" tabindex="-1">&times;</button>
+        <h4 class="modal-title">Deltagare</h4>
+    </div>
+    <form novalidate>
+        <div class="modal-body">
+            <div class="row">
+
+                <div class="col-md-6">
+                    <h5>Information</h5>
+
+                    <div>
+                        <label for="id">{{ comp.ptId }}</label>
+                        <input id="id" ng-model="pt.id">
+                    </div>
+                    <div>
+                        <label for="desc">{{ comp.ptDesc }}</label>
+                        <input id="desc" ng-model="pt.desc">
+                    </div>
+                    <div ng-repeat="infoTitle in comp.ptInfoArr track by $index">
+                        <label for="info{{$index}}">{{ infoTitle }}</label>
+                        <input id="info{{$index}}" ng-model="pt.info[$index]">
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <h5>Tider</h5>
+
+                    <div ng-repeat="lapInfo in comp.lapInfoArr">
+                        <label>{{ lapInfo.title }}</label>
+                        <input type="time" step="1" ng-model="times[$index]" class="time-input" placeholder="">
+                    </div>
+                    <span ng-show="comp.lapInfoArr.length === 0">Inga tider inrapporterade.</span>
+                    <a href="#" ng-click="addLapInfo()">Lägg till</a>
+                </div>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <p> Deltagaren ska starta
+                    <input type="number" min="0" placeholder="" ng-model-options="{ getterSetter: true }" ng-model="startSecOffset" style="width: 60px;">
+                    sekunder efter första start.
+                </p>
+            </div>
+
+
+        </div>
+        <div ng-if="!newPt"class="modal-footer">
+            <em style="margin-right: 5px;">Ändringar autosparas</em>
+            <button type="submit" class="btn btn-default" ng-click="$close()">Stäng</button>
+        </div>
+        <div ng-if="newPt" class="modal-footer">
+            <button type="button" class="btn btn-default" ng-click="$dismiss()">Stäng</button>
+            <button ng-if="newPt" type="submit" class="btn btn-primary" ng-click="saveNewPt()">Lägg till</button>
+        </div>
+    </form>
+</div>

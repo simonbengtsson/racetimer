@@ -1,7 +1,15 @@
+@red: #c0392b;
+@blue: #428bca;
+
 html, body {
   height: 100%;
   -webkit-user-select: none;
   user-select: none;
+}
+
+p {
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 .main {
@@ -42,11 +50,19 @@ html, body {
       color: #aaa;
     }
 
+    .glyphicon-search {
+      color: #fff;
+      font-size: 20px;
+      line-height: 20px;
+      vertical-align: middle;
+      margin-top: -6px;
+    }
+
     .search {
       outline: none;
       border-radius: 15px;
       margin: 10px;
-      margin-top: 12px;
+      margin-top: 13px;
       padding: 2px 15px;
       width: 150px;
       border: none;
@@ -68,6 +84,7 @@ html, body {
 
     .dropdown-menu {
       border-top: 0;
+      width: 280px;
       margin: 0;
       border-radius: 0;
 
@@ -89,8 +106,6 @@ html, body {
 
   .drivers-table {
     margin-bottom: 0;
-    -webkit-user-select: text;
-    user-select: text;
   }
 
   .no-drivers-msg {
@@ -109,10 +124,20 @@ html, body {
     font-size: 12px;
     padding: 5px;
   }
+
+  th:hover {
+    background: #eee;
+    cursor: pointer;
+  }
+
+  td {
+    -webkit-user-select: text;
+    user-select: text;
+  }
 }
 
 .sidebar {
-  width: 250px;
+  width: 300px;
   background: #eee;
   border-right: 1px solid #ddd;
 
@@ -126,6 +151,34 @@ html, body {
   p {
     color: #777;
     font-weight: 500;
+  }
+
+  .dl-horizontal dt {
+    width: 60px;
+    color: #777;
+  }
+
+  .dl-horizontal dd {
+    position: relative;
+    margin-left: 60px;
+    color: #777;
+    padding: 1px 21px 1px 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    .glyphicon {
+      position: absolute;
+      top: 3px;
+      right: 5px;
+    }
+  }
+
+  .dl-horizontal dd.editable:hover {
+    background: @blue;
+    color: white;
+    cursor: pointer;
+    border-radius: 3px;
   }
 
   section {
@@ -264,6 +317,11 @@ html, body {
   background: #f0f5f9;
 }
 
+table.clickable-rows tbody tr:hover td {
+  background: #d0dfec;
+  cursor: pointer;
+}
+
 .dl-horizontal dt {
   float: left;
   width: 170px;
@@ -303,7 +361,7 @@ input {
   padding: 3px 7px;
 }
 
-input.invalid {
+input.invalid, input.ng-invalid {
   border-bottom: 2px solid darkred;
 }
 
@@ -331,4 +389,40 @@ input.invalid {
 
 a {
   cursor: pointer;
+}
+
+#comp-modal, .modal-cont  {
+
+  label {
+    width: 90px;
+    margin-top: 3px;
+    text-overflow: ellipsis;
+    vertical-align: top;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  h5 {
+    font-size: 14px;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: #aaa;
+  }
+
+  .date-label {
+    margin-top: 7px;
+    vertical-align: top;
+  }
+
+  .time-input {
+    padding: 0 5px;
+    margin-bottom: 0;
+    width: 110px;
+  }
+
+  input {
+    line-height: 1.2;
+    margin-bottom: 5px;
+    width: 160px;
+  }
 }
