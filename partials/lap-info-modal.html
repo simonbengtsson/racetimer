@@ -1,20 +1,19 @@
 <div id="pt-modal" class="modal-cont">
     <div class="modal-header">
         <button type="button" class="close" ng-click="$dismiss()" tabindex="-1">&times;</button>
-        <h4 class="modal-title">Varv information</h4>
+        <h4 class="modal-title">Sträckor</h4>
     </div>
     <form novalidate>
         <div class="modal-body">
             <div class="row">
 
                 <div class="col-md-12">
-                    <h5>Varv</h5>
-
                     <div ng-repeat="lapInfo in comp.lapInfoArr">
                         <input step="1" ng-model="lapInfo.title" placeholder="">
                     </div>
-                    <span ng-show="comp.lapInfoArr.length === 0">Inga varv skapade.</span>
+                    <span ng-show="comp.lapInfoArr.length === 0">Inga sträckor skapade.</span>
                     <a href="#" ng-click="comp.addLapInfo()">Lägg till</a>
+                    <p style="margin-top: 10px;">Vid behov kommer varv att skapas automatiskt under tävlingen.</p>
                 </div>
             </div>
 

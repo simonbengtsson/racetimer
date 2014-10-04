@@ -1,4 +1,4 @@
-var stApp = angular.module('enduroApp', ['ui.bootstrap', 'angularFileUpload', 'cfp.hotkeys']);
+var stApp = angular.module('enduroApp', ['ui.bootstrap', 'angularFileUpload', 'cfp.hotkeys', 'de.ng-sortable']);
 
 stApp.config(function (hotkeysProvider) {
     hotkeysProvider.includeCheatSheet = true;
@@ -6,7 +6,8 @@ stApp.config(function (hotkeysProvider) {
     hotkeysProvider.templateTitle = 'Kortkommandon';
 });
 
-stApp.controller('MainController', ['$scope', 'competition', '$modal', '$log', 'hotkeys', 'pdfgen', function ($scope, competition, $modal, $log, hotkeys, pdfgen) {
+stApp.controller('MainController', ['$scope', 'competition', '$modal', '$log', 'hotkeys', 'pdfgen',
+    function ($scope, competition, $modal, $log, hotkeys, pdfgen) {
 
     var MAX_LATEST = 15;
 
@@ -14,11 +15,11 @@ stApp.controller('MainController', ['$scope', 'competition', '$modal', '$log', '
     $scope.comp = competition;
 
     $scope.reverse = false;
-    $scope.sortColumn = 'plac';
+    $scope.sortColumn = [comp.getStartTime, 'id'];
 
     $scope.changeSort = function (sc) {
-        $scope.reverse = !$scope.reverse;
-        $scope.sortColumn = sc;
+        $scope.reverse = (sc === $scope.sortColumn[0] ? !$scope.reverse : false);
+        $scope.sortColumn = [sc, 'id'];
     };
 
     hotkeys.add({
@@ -33,7 +34,6 @@ stApp.controller('MainController', ['$scope', 'competition', '$modal', '$log', '
         combo: ['ctrl+B'],
         description: 'Säkerhetskopiera tävling',
         callback: function () {
-            console.log('sdf');
             comp.saveToFile();
         }
     });
@@ -75,17 +75,11 @@ stApp.controller('MainController', ['$scope', 'competition', '$modal', '$log', '
         } else {
             comp.addLap(data.pt, time);
             $scope.latest.unshift({lap: time, pt: data.pt});
-            if ($scope.latest.length > MAX_LATEST) {
-                $scope.latest.pop();
-            }
         }
     };
 
     $scope.addWithoutPt = function () {
         $scope.latest.unshift({lap: new Date()});
-        if ($scope.latest.length > MAX_LATEST) {
-            $scope.latest.pop();
-        }
     };
 
     $scope.removeLatest = function (index) {
@@ -95,8 +89,44 @@ stApp.controller('MainController', ['$scope', 'competition', '$modal', '$log', '
     $scope.openImport = function () {
         $modal.open({
             templateUrl: 'partials/import-modal.html',
-            controller: ['$scope', '$modalInstance', 'competition', ImportCtrl],
+            controller: ['$scope', '$modalInstance', 'competition', '$filter', ImportCtrl],
             size: 'lg'
+        });
+    };
+
+    $scope.openLoad = function () {
+        $modal.open({
+            templateUrl: 'partials/load-modal.html',
+            controller: ['$scope', '$modalInstance', 'competition', function () {
+                $scope.modal = {};
+                $scope.modal.comp = {};
+
+                $scope.onFileSelect = function ($files) {
+                    console.log('sdf');
+                    readFile($files[0]);
+                };
+
+                /**
+                 * @param {File} file
+                 */
+                function readFile(file) {
+                    var textType = /text.*/;
+
+                    console.log('sdf');
+
+                    if (file.type.match(textType) || (!file.type && file)) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            $scope.comp = JSON.parse(e.target.result);
+                            console.log(e.target.result);
+                        };
+                        reader.readAsText(file);
+                        $scope.modal.fileInfo = file.name;
+                    } else {
+                        $scope.modal.fileInfo = "Filen kunde inte läsas";
+                    }
+                }
+            }]
         });
     };
 
@@ -109,15 +139,38 @@ stApp.controller('MainController', ['$scope', 'competition', '$modal', '$log', '
         });
     };
 
+    $scope.openEditModal = function () {
+        $modal.open({
+            templateUrl: 'partials/edit-modal.html',
+            controller: ['$scope', '$modalInstance', 'competition', function ($scope) {
+                $scope.comp = comp;
+
+                $scope.sortableOptions = {
+                    handle: '.sortable-handle',
+                    onUpdate: function () {
+                    }
+                };
+            }]
+        });
+    };
+
     $scope.openPtModal = function (pt, newPt) {
         $modal.open({
             templateUrl: 'partials/pt-modal.html',
             controller: ['$scope', '$modalInstance', 'competition', function ($scope, $modalInstance, comp) {
                 $scope.comp = comp;
+                $scope.modal = {};
                 $scope.newPt = newPt;
                 if (newPt) pt = new comp.Participant("", "", []);
                 $scope.pt = pt;
-                var startSecOffset = pt.startMilliOffset / 1000;
+
+                $scope.modal.startGroup = Math.floor(comp.pts.indexOf(pt) / comp.getStartGroupSize());
+
+                $scope.startGroupChange = function () {
+                    var pos = $scope.modal.startGroup * comp.getStartGroupSize();
+                    var index = comp.pts.indexOf(pt);
+                    Utils.arrMove(comp.pts, index, pos);
+                };
 
                 $scope.times = {};
                 pt.laps.forEach(function (lap) {
@@ -130,7 +183,7 @@ stApp.controller('MainController', ['$scope', 'competition', '$modal', '$log', '
                         if (time) {
                             var newTime = new Date(comp.startTime);
                             newTime.setHours(time.getHours(), time.getMinutes(), time.getSeconds());
-                            var lap = comp.newLap(newTime, key);
+                            var lap = comp.newLap(newTime, "" + key);
                             pt.laps.push(lap);
                         } else {
                             delete $scope.times[key];
@@ -138,13 +191,28 @@ stApp.controller('MainController', ['$scope', 'competition', '$modal', '$log', '
                     });
                 }, true);
 
-                $scope.startSecOffset = function (newVal) {
-                    if (arguments.length > 0) {
-                        startSecOffset = (angular.isNumber(newVal) ? newVal : '');
-                        pt.startMilliOffset = startSecOffset * 1000;
+                function getStartGroups() {
+                    var startGroups = [];
+                    var size = Math.ceil(comp.pts.length / comp.getStartGroupSize());
+                    for (var i = 0; i < size; i++) {
+                        var d = new Date(comp.startTime);
+                        var offset = i * comp.startInterval;
+                        d.setSeconds(d.getSeconds() + offset);
+                        startGroups.push({
+                            index: i,
+                            startTime: d,
+                            offset: offset,
+                            title: (i + 1) + ' (+' + offset + ' sek)'
+                        });
+
+                        for (var j = 0; j < comp.getStartGroupSize(); j++) {
+                            comp.pts[i + j].startMilliOffset = offset * 1000;
+                        }
                     }
-                    return startSecOffset;
-                };
+                    return startGroups;
+                }
+
+                $scope.startGroups = getStartGroups();
 
                 $scope.addLapInfo = function () {
                     comp.addLapInfo();
@@ -180,7 +248,7 @@ stApp.controller('MainController', ['$scope', 'competition', '$modal', '$log', '
                         comp.startTime = date;
                         $modalInstance.close();
                     } else {
-                        console.log('Not valid type: ' + $scope.type);
+                        console.error('Not valid type: ' + $scope.type);
                     }
 
                 };
@@ -189,32 +257,19 @@ stApp.controller('MainController', ['$scope', 'competition', '$modal', '$log', '
     };
 
     $scope.createPdf = function (type) {
-        switch (type) {
-            case 'start-list':
-                pdfgen.startList();
-                break;
-            case 'results':
-                pdfgen.results();
-                break;
-            default:
-                console.error('Not supported type: ' + type);
-        }
-
-    };
-
-    $scope.openRegModal = function () {
-        $modal.open({
-            templateUrl: 'partials/reg-modal.html'
-        });
+        pdfgen.create(type);
     };
 
     $scope.openModal = function (partial) {
         $modal.open({
-            templateUrl: 'partials/' + partial
+            templateUrl: 'partials/' + partial,
+            controller: ['$scope', '$modalInstance', 'competition', function ($scope) {
+                $scope.comp = comp;
+            }]
         });
     };
 
-    var ImportCtrl = function ($scope, $modalInstance, comp) {
+    var ImportCtrl = function ($scope, $modalInstance, comp, $filter) {
 
         $scope.modal = {};
 
@@ -273,12 +328,15 @@ stApp.controller('MainController', ['$scope', 'competition', '$modal', '$log', '
             var desci = $scope.modal.headers.indexOf($scope.modal.ptDesc);
             var pts = [];
             $scope.modal.pts.forEach(function (data) {
-                var id = data[idi];
+                var id = !isNaN(data[idi]) ? parseInt(data[idi]) : data[idi];
                 var desc = data[desci];
                 data.splice(Math.max(idi, desci), 1);
                 data.splice(Math.min(idi, desci), 1);
                 pts.push(comp.newPt(id, desc, data));
             });
+
+            pts = $filter('orderBy')(pts, 'id');
+
             var othersHeaders = $scope.modal.headers;
             othersHeaders.splice(Math.max(idi, desci), 1);
             othersHeaders.splice(Math.min(idi, desci), 1);
@@ -287,89 +345,4 @@ stApp.controller('MainController', ['$scope', 'competition', '$modal', '$log', '
         };
     };
 
-}])
-;
-
-stApp.directive('esTime', ['$interval', '$filter', function ($interval, $filter) {
-
-        function link(scope, element, attrs) {
-            var format, timeoutId;
-
-            function updateTime() {
-                var format = attrs.format || 'HH:mm:ss';
-                element.text($filter('date')(new Date(), format));
-            }
-
-            updateTime();
-            timeoutId = $interval(function () {
-                updateTime();
-            }, 1000);
-
-            element.on('$destroy', function () {
-                $interval.cancel(timeoutId);
-            });
-
-        }
-
-        return {
-            restrict: 'E',
-            link: link
-        }
-    }]
-);
-
-stApp.directive('stRepInput', ['$filter', 'competition', function ($filter, competition) {
-
-        function link(scope, element, attrs, ctrl) {
-            scope.reporting = {searchTerm: ''};
-            var comp = competition;
-            scope.comp = competition;
-            scope.showButton = !!attrs.button;
-            scope.$watch('reporting.searchTerm', function (newValue) {
-                var valid = !newValue || !!competition.findPt(newValue);
-                element.find('input').toggleClass('invalid', !valid);
-            });
-
-            scope.localSubmit = function () {
-                if (!scope.reporting.searchTerm) {
-                    scope.submitWithoutPt();
-                } else {
-                    var pt = comp.findPt(scope.reporting.searchTerm);
-                    if (pt) {
-                        scope.submit({data: {pt: pt, latestIndex: scope.latestIndex} });
-                        scope.reporting.searchTerm = '';
-                    }
-                }
-            };
-        }
-
-        var template = '<form novalidate ng-submit="localSubmit()" class="st-rep-form">' +
-            '<input ng-model="reporting.searchTerm" class="search" placeholder="{{ comp.ptId }}">' +
-            '<button ng-if="showButton" type="submit" class="btn btn-primary btn-search">' +
-            '<span class="glyphicon glyphicon-plus"></span>' +
-            '</button>' +
-            '</form>';
-
-        return {
-            restrict: 'E',
-            replace: true,
-            template: template,
-            scope: {
-                submit: '&',
-                submitWithoutPt: '&',
-                latestIndex: '='
-            },
-            link: link
-        }
-    }]
-);
-
-stApp.directive('focusMe', function ($timeout) {
-    return {
-        link: function (scope, element, attrs, model) {
-            $timeout(function () {
-                element[0].focus();
-            });
-        }
-    };
-});
+}]);

@@ -48,16 +48,16 @@
                         <span class="keyboard-shortcut">ctrl I</span>
                     </a>
                 </li>
+                <!--
                 <li ng-click="comp.saveToFile()">
                     <a tabindex="-1" href="#" id="save-to-file" download="{{ comp.name | slug }}.rwatch">
-                        <span class="glyphicon glyphicon-cloud"></span>
-                        Säkerhetskopiera tävling
+                        <span class="glyphicon glyphicon-save"></span>
+                        Spara tävling
                         <span class="keyboard-shortcut">ctrl S</span>
                     </a>
                 </li>
-                <!--
                 <li>
-                    <a tabindex="-1" href="#">
+                    <a tabindex="-1" href="#" ng-click="openLoad()">
                         <span class="glyphicon glyphicon-open"></span>
                         Öppna tävling
                         <span class="keyboard-shortcut">ctrl O</span>
@@ -93,14 +93,21 @@
                 <dd class="editable" ng-click="openCompModal('startTime')">
                     {{ comp.startTime | date:'yyyy-MM-dd HH:mm:ss' }}<span class="glyphicon glyphicon-edit"></span>
                 </dd>
-                <dt>Varv</dt>
+                <dt>Sträckor</dt>
                 <dd class="editable" ng-click="openLapInfoModal()">
                     {{ comp.lapInfoArr.length }}<span class="glyphicon glyphicon-edit"></span>
                 </dd>
-                <dt>Starter</dt>
-                <dd>
-                    {{ comp.getStartGroups() }}
+                <dt>Start</dt>
+                <dd class="editable" ng-click="openEditModal()">
+                    {{ comp.compType === 'massStart' ? 'Masstart' : 'Intervallstart (' + comp.getStartGroupSize() + ')'}}
+                    <span class="glyphicon glyphicon-edit"></span>
                 </dd>
+                <!--
+                <dt>Klasser</dt>
+                <dd class="editable" ng-click="openEditModal()">
+                    {{ comp.classes.length ? comp.classes.join(', ') : 'Standard' }} <span class="glyphicon glyphicon-edit"></span>
+                </dd>
+                -->
             </dl>
         </section>
         <section>
@@ -132,6 +139,7 @@
         <table id="pt-table" class="table table-striped table-condensed drivers-table clickable-rows">
             <thead>
             <tr>
+                <th ng-click="changeSort(comp.getStartTime)">Start</th>
                 <th ng-click="changeSort('plac')">
                     Plac
                     <!--
@@ -143,7 +151,6 @@
                 </th>
                 <th ng-bind="comp.ptId" ng-click="changeSort('id')"></th>
                 <th ng-bind="comp.ptDesc" ng-click="changeSort('desc')"></th>
-                <th ng-click="changeSort('getStartTime()')">Start</th>
                 <th ng-repeat="info in comp.ptInfoArr" ng-click="changeSort('info[' + $index + ']')">{{ info }}</th>
                 <th ng-repeat="lapInfo in comp.lapInfoArr" ng-click="changeSort('laps[' + lapInfo.key + '].time')">
                     {{lapInfo.title}}
@@ -152,20 +159,22 @@
             </tr>
             </thead>
             <tr ng-repeat="pt in comp.pts | orderBy : sortColumn : reverse | filter:searchTerm track by $index"
-                ng-click="openPtModal(pt)">
+                ng-click="openPtModal(pt)" ng-class="$index % comp.getStartGroupSize() === 0 ? 'new-start-group' : ''">
+                <td>{{ comp.getStartTime(pt) | date:'HH:mm:ss' }}</td>
                 <td>{{ calcPlac(pt) }}</td>
                 <td>{{ pt.id }}</td>
                 <td>{{ pt.desc }}</td>
-                <td>{{ pt.getStartTime() | date:'HH:mm:ss' }}</td>
                 <td ng-repeat="info in comp.ptInfoArr">{{ pt.info[$index] }}</td>
-                <td ng-repeat="lapInfo in comp.lapInfoArr">{{ pt.getLapTime($index) || '' }}</td>
+                <td ng-repeat="lapInfo in comp.lapInfoArr">{{ pt.getLapTime($index) || '' }} {{
+                    pt.getLapPlac(lapInfo.key) }}
+                </td>
                 <td>{{ pt.getTotal() }}</td>
             </tr>
         </table>
         <p ng-if="false" class="table-info">Antal förare: {{ comp.pts.length }}</p>
-        <h5 class="no-drivers-msg" ng-if="drivers.length === 0">
+        <h5 class="no-drivers-msg" ng-if="comp.pts.length === 0">
             Inga förare tillagda.
-            <a href="#" data-target="#import-modal" data-toggle="modal">Lägg till</a>
+            <a href="#" ng-click="openPtModal(null, true)">Lägg till</a> eller <a href="#" ng-click="openImport()">importera</a>
         </h5>
     </section>
 </div>

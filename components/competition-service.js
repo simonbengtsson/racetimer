@@ -11,17 +11,32 @@ angular.module('enduroApp').service('competition', function () {
     this.ptDesc = 'Desc';
     this.ptInfoArr = ['Club', 'Brand'];
     this.lapInfoArr = [];
+    this.classes = [];
+    this.startInterval = 10;
+    this.compType = 'massStart';
 
-    this.getStartGroups = function () {
-        return 'Masstart';
+    this.pts = [];
+
+    this.newPt = function (id, desc, info) {
+        return new Participant(id, desc, info, comp.pts.length);
     };
 
-    this.pts = [
-        new Participant(1, 'Simon Bengtsson', ['Ryttarna', 'Honda']),
-        new Participant(12, 'Jarl Nic', ['Ryttarna', 'Honda']),
-        new Participant(5, 'Mark Smith', ['Sollentuna MC', 'Yamaha']),
-        new Participant(2, 'Susan Eade', ['Sollentuna MC', 'R11'])
-    ];
+    /*
+    this.pts.push(comp.newPt(1, 'Simon Bengtsson', ['Ryttarna', 'Honda']));
+    this.pts.push(comp.newPt(12, 'Jarl Nic', ['Ryttarna', 'Honda']));
+    this.pts.push(comp.newPt(5, 'Mark Smith', ['Sollentuna MC', 'Yamaha']));
+    this.pts.push(comp.newPt(2, 'Susan Eade', ['Sollentuna MC', 'R11']));
+    this.pts.push(comp.newPt(3, 'Simon Bengtsson', ['Ryttarna', 'Honda']));
+    this.pts.push(comp.newPt(8, 'Jarl Nic', ['Ryttarna', 'Honda']));
+    this.pts.push(comp.newPt(4, 'Mark Smith', ['Sollentuna MC', 'Yamaha']));
+    this.pts.push(comp.newPt(6, 'Susan Eade', ['Sollentuna MC', 'R11']));
+    */
+
+    this._startGroupSize = 4;
+
+    this.getStartGroupSize = function() {
+        return comp.compType === 'massStart' ? comp.pts.length : comp._startGroupSize;
+    };
 
     this.initialize = function (pts, ptId, ptDesc, ptInfoArr) {
         comp.pts = pts;
@@ -49,7 +64,7 @@ angular.module('enduroApp').service('competition', function () {
     };
 
     /**
-     *
+     * Add a time to first empty lapInfo. If none exists, create new lapInfo
      * @param {Participant} pt
      * @param {Date} time
      */
@@ -58,7 +73,7 @@ angular.module('enduroApp').service('competition', function () {
         for (var i = 0; i < comp.lapInfoArr.length; i++) {
             var alreadyExists = false;
             for (var j = 0; j < pt.laps.length; j++) {
-                if (pt.laps[j].lapInfoKey === comp.lapInfoArr[i].key) {
+                if (equalId(pt.laps[j].lapInfoKey, comp.lapInfoArr[i].key)) {
                     alreadyExists = true;
                     break;
                 }
@@ -69,8 +84,7 @@ angular.module('enduroApp').service('competition', function () {
             }
         }
 
-        if (!lapInfo)
-            lapInfo = comp.addLapInfo();
+        if (!lapInfo) lapInfo = comp.addLapInfo();
         pt.laps.push(new Lap(time, lapInfo.key));
     };
 
@@ -93,8 +107,9 @@ angular.module('enduroApp').service('competition', function () {
         return false;
     };
 
-    this.newPt = function (id, desc, info) {
-        return new Participant(id, desc, info);
+    this.getStartTime = function (pt) {
+        var offset = comp.startInterval * 1000 * Math.floor(comp.pts.indexOf(pt) / comp.getStartGroupSize());
+        return new Date(comp.startTime.getTime() + offset);
     };
 
     function Participant(nr, desc, info) {
@@ -107,10 +122,6 @@ angular.module('enduroApp').service('competition', function () {
         this.laps = [];
         this.startMilliOffset = 0;
 
-        this.getStartTime = function () {
-            return new Date(comp.startTime.getTime() + this.startMilliOffset);
-        };
-
         this.importFrom = function (pt) {
             this.id = pt.id;
             this.desc = pt.desc;
@@ -119,28 +130,39 @@ angular.module('enduroApp').service('competition', function () {
             this.startMilliOffset = pt.startMilliOffset;
         };
 
-        this.getLapTime = function (index, lapInfoId) {
-            var prev = (index === 0 ? {time: pt.getStartTime()} : findLap(index - 1));
-            var curr = findLap(index);
+        this.getLapTime = function (lapInfoIndex) {
+            var prev = (lapInfoIndex === 0 ? {time: comp.getStartTime(pt)} : findLap(lapInfoIndex - 1));
+            var curr = findLap(lapInfoIndex);
             if (prev && curr)
                 var diff = Utils.timeDiff(prev.time, curr.time);
             return (diff && diff.milli > 0 ? diff.str : '');
         };
 
-        function findLap(lapInfoIndex) {
+        this.getLapPlac = function (lapInfoId) {
+            if (!pt.laps[lapInfoId])
+                return '';
+            var plac = 1;
+            comp.pts.forEach(function (item) {
+                if (item.laps[lapInfoId] && (item.laps[lapInfoId].time < pt.laps[lapInfoId].time))
+                    plac++;
+            });
+            return '(' + plac + ')';
+        };
+
+        var findLap = function(lapInfoIndex) {
             var lapInfoId = comp.lapInfoArr[lapInfoIndex].key;
             for (var i = 0; i < pt.laps.length; i++) {
                 if (('' + lapInfoId) === ('' + pt.laps[i].lapInfoKey))
                     return pt.laps[i];
             }
             return false;
-        }
+        };
 
         this.getTotal = function () {
             if (this.laps.length === 0)
                 return '';
             var lastLap = this.laps[this.laps.length - 1];
-            var diff = Utils.timeDiff(pt.getStartTime(), lastLap.time);
+            var diff = Utils.timeDiff(comp.getStartTime(pt), lastLap.time);
             return diff.str;
         }
     }
@@ -163,7 +185,7 @@ angular.module('enduroApp').service('competition', function () {
     function LapInfo(title) {
         if (!LapInfo.id) LapInfo.id = 0;
         this.title = title;
-        this.key = LapInfo.id;
+        this.key = "" + LapInfo.id;
         LapInfo.id++;
     }
 

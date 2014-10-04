@@ -22,6 +22,14 @@
                         <label for="info{{$index}}">{{ infoTitle }}</label>
                         <input id="info{{$index}}" ng-model="pt.info[$index]">
                     </div>
+                    <div>
+                        <label for="start-time">Start</label>
+
+                        <select id="start-time" ng-model="modal.startGroup" ng-change="startGroupChange()">
+                            <option ng-selected="$index === modal.startGroup" ng-repeat="sg in startGroups" value="{{ $index }}"> {{ sg.title }} </option>
+                        </select>
+
+                    </div>
                 </div>
 
                 <div class="col-md-6">
@@ -29,20 +37,21 @@
 
                     <div ng-repeat="lapInfo in comp.lapInfoArr">
                         <label>{{ lapInfo.title }}</label>
-                        <input type="time" step="1" ng-model="times[$index]" class="time-input" placeholder="">
+                        <input type="time" step="1" ng-model="times[$index]" class="time-input" placeholder="" ng-class="times[$index] < 0 ? 'invalid' : ''">
                     </div>
                     <span ng-show="comp.lapInfoArr.length === 0">Inga tider inrapporterade.</span>
                     <a href="#" ng-click="addLapInfo()">Lägg till</a>
                 </div>
             </div>
 
+            <!--
             <div style="margin-top: 15px;">
                 <p> Deltagaren ska starta
                     <input type="number" min="0" placeholder="" ng-model-options="{ getterSetter: true }" ng-model="startSecOffset" style="width: 60px;">
                     sekunder efter första start.
                 </p>
             </div>
-
+            -->
 
         </div>
         <div ng-if="!newPt"class="modal-footer">

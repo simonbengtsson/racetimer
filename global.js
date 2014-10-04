@@ -58,7 +58,7 @@ var Utils = new function () {
             }
             return value;
         };
-        return JSON.parse(JSON.stringify(obj) , dateParser);
+        return JSON.parse(JSON.stringify(obj), dateParser);
     };
 
     this.shortcutChar = function (append) {
@@ -77,8 +77,17 @@ var Utils = new function () {
      */
     this.strCount = function (needle, haystack) {
         return (haystack.match(new RegExp(needle, 'g')) || []).length
-    }
+    };
 
+    this.arrMove = function (arr, old_index, new_index) {
+        if (new_index >= arr.length) {
+            var k = new_index - arr.length;
+            while ((k--) + 1) {
+                arr.push(undefined);
+            }
+        }
+        arr.splice(new_index, 0, arr.splice(old_index, 1)[0]);
+    };
 };
 
 // Unload and beforeunload is not allowed in chrome apps (used by jsPDF)

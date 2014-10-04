@@ -104,8 +104,23 @@ p {
     overflow-y: scroll;
   }
 
-  .drivers-table {
-    margin-bottom: 0;
+  #pt-table {
+    tr:nth-child(odd) > td {
+      background: #f0f5f9;
+    }
+
+    td {
+      border: none;
+    }
+
+    .new-start-group td {
+      border-top: 2px solid #ddd;
+    }
+  }
+
+  #pt-table.clickable-rows tbody tr:hover td {
+    background: #cde;
+    cursor: pointer;
   }
 
   .no-drivers-msg {
@@ -130,16 +145,13 @@ p {
     cursor: pointer;
   }
 
-  td {
-    -webkit-user-select: text;
-    user-select: text;
-  }
 }
 
 .sidebar {
   width: 300px;
   background: #eee;
   border-right: 1px solid #ddd;
+  overflow: scroll;
 
   h4 {
     font-weight: 200;
@@ -313,15 +325,6 @@ p {
   border-radius: 0;
 }
 
-.table-striped > tbody > tr:nth-child(odd) > td {
-  background: #f0f5f9;
-}
-
-table.clickable-rows tbody tr:hover td {
-  background: #d0dfec;
-  cursor: pointer;
-}
-
 .dl-horizontal dt {
   float: left;
   width: 170px;
@@ -361,6 +364,11 @@ input {
   padding: 3px 7px;
 }
 
+input[disabled] {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
 input.invalid, input.ng-invalid {
   border-bottom: 2px solid darkred;
 }
@@ -391,7 +399,7 @@ a {
   cursor: pointer;
 }
 
-#comp-modal, .modal-cont  {
+#comp-modal, .modal-cont {
 
   label {
     width: 90px;
@@ -424,5 +432,48 @@ a {
     line-height: 1.2;
     margin-bottom: 5px;
     width: 160px;
+  }
+}
+
+td {
+  -webkit-user-select: text;
+  user-select: text;
+  white-space: nowrap;
+}
+
+.sortable-handle {
+  cursor: move;
+  user-drag: none;
+  -moz-user-select: none;
+  -webkit-user-drag: none;
+
+  img {
+    height: 20px;
+  }
+}
+
+.block {
+  opacity: 1;
+  position: absolute;
+}
+
+.sortable-ghost {
+  opacity: 0.4;
+  background-color: #ddd;
+}
+
+#edit-modal {
+  input, select {
+    display: block;
+  }
+  select {
+    font-size: 20px;
+  }
+  label {
+    width: auto;
+  }
+
+  .form-group {
+    display: inline-block;
   }
 }

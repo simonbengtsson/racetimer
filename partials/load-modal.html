@@ -1,0 +1,26 @@
+<div id="import-modal">
+    <div class="modal-header">
+        <button type="button" class="close" ng-click="$dismiss()">&times;</button>
+        <h4 class="modal-title">Öppna tävling</h4>
+    </div>
+    <div class="modal-body">
+        <div class="file-upload-area" ng-file-drop="onFileSelect($files)" ng-file-drag-over-class="drag-over">
+            <span class="glyphicon glyphicon-file"></span>
+            <span>Dra fil hit <em style="margin: 0 5px;">eller</em> </span>
+            <button class="btn btn-default" ng-file-select="onFileSelect($files)">Välj fil</button>
+        </div>
+
+        <dl class="dl-horizontal well">
+            <dt>Fil:</dt>
+            <dd>{{ modal.fileInfo || 'Ingen fil vald' }}</dd>
+            <dt>Deltagare:</dt>
+            <dd>{{ comp.length || '-' }}</dd>
+            <dt>Starttid:</dt>
+            <dd>{{ comp.startTime || '-' }}</dd>
+        </dl>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" ng-click="$dismiss()">Stäng</button>
+        <button type="button" class="btn btn-primary" ng-click="makeImport()">Öppna</button>
+    </div>
+</div>

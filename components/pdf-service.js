@@ -3,65 +3,156 @@
  */
 angular.module('enduroApp').service('pdfgen', ['competition', '$filter', function (comp, $filter) {
 
-    var DEFAULT_MARGIN = 40;
-    var doc = new jsPDF('p', 'pt');
+    var self = this;
+    this.START_TYPE = 'start-list';
+    this.RESULT_TYPE = 'results';
 
-    var columns;
-    var data;
+    this.create = function (type) {
+        self.type = type;
+        var title = (type === self.RESULT_TYPE ? 'Resultat ' : 'Startlista ') + comp.name;
+        var def = {
+            footer: footer(),
+            content: [
+                { text: title, style: 'mainHeader' },
+                {
+                    table: table(headers(), data(), widths()),
+                    layout: layout()
+                }
+            ],
+            styles: {
+                tableHeader: {
+                    bold: true,
+                    fontSize: 11
+                },
+                mainHeader: {
+                    fontSize: 20,
+                    lineHeight: 50,
+                    alignment: 'center',
+                    color: '#555',
+                    bold: true,
+                    margin: [0, 0, 0, 5]
+                }
+            },
+            defaultStyle: {
+                fontSize: 9,
+                color: '#333'
+            }
+        };
 
-    this.results = function () {
-        columns = ['Plac', comp.ptId, comp.ptDesc].concat(comp.ptInfoArr).concat(['Varv 1', 'Total']);
-        data = [];
-        comp.pts.forEach(function (pt) {
-            data.push([pt.plac, pt.id, pt.desc].concat(pt.info).concat(['', '']));
-        });
-        create('Resultat ' + comp.name, columns, data);
+        if (comp.lapInfoArr.length > 2 && self.RESULT_TYPE === self.type) {
+            def.pageOrientation = 'landscape';
+            def.pageMargins = [40, 30, 40, 50];
+        }
+
+        pdfMake.createPdf(def).open();
     };
 
-    this.startList = function () {
-        columns = [comp.ptId, comp.ptDesc].concat(comp.ptInfoArr);
-        data = [];
-        comp.pts.forEach(function (pt) {
-            data.push([pt.id, pt.desc].concat(pt.info));
-        });
-        create('Startlista ' + comp.name, columns, data);
-    };
+    function headers() {
+        var lapTitles = [];
+        if (self.type === self.RESULT_TYPE) {
+            comp.lapInfoArr.forEach(function (info) {
+                lapTitles.push(info.title);
+            });
+        }
 
-    function create(title, columns, data) {
-        var size = doc.internal.pageSize;
-        doc.setFontSize(20).setTextColor(100).setFontStyle('bold');
-        doc.text(title, DEFAULT_MARGIN, DEFAULT_MARGIN + 8);
-        doc.setFontStyle('normal').setFontSize(10);
-        doc.autoTable(columns, data, {margins: {horizontal: DEFAULT_MARGIN, top: 60, bottom: DEFAULT_MARGIN}});
-        doc.output('dataurlnewwindow');
+        var columns = [comp.ptId, comp.ptDesc, 'Start'].concat(comp.ptInfoArr).concat(lapTitles);
+        if (self.type === self.RESULT_TYPE) {
+            columns.unshift('Plac');
+            columns.push('Total');
+        }
+        var headers = [];
+        for (var i = 0; i < columns.length; i++) {
+            headers[i] = { text: columns[i], style: 'tableHeader' };
+        }
+        return headers;
     }
 
-    function rightText(txt) {
+    function data() {
+        var data = [];
+        var pts = $filter('orderBy')(comp.pts, 'plac');
+        pts.forEach(function (pt) {
+            var times = [];
+            if (self.type === self.RESULT_TYPE) {
+                comp.lapInfoArr.forEach(function (info, i) {
+                    times.push(pt.getLapTime(i, info.key) + ' ' + pt.getLapPlac(info.key));
+                });
+            }
+            var start = $filter('date')(comp.getStartTime(pt), 'HH:mm:ss');
 
+            var row = ["" + pt.id, pt.desc, start].concat(pt.info).concat(times);
+            if (self.type === self.RESULT_TYPE) {
+                row.unshift("" + pt.plac);
+                row.push(pt.getTotal());
+            }
+            data.push(row);
+        });
+        return data;
     }
 
-    this.sample = function () {
-        columns = [
-            {title: "ID", key: "id"},
-            {title: "Name", key: "name"},
-            {title: "Country", key: "country"},
-            {title: "IP-address", key: "ip_address"},
-            {title: "Email", key: "email"}
-        ];
-        data = [
-            {"id": 1, "name": "Shaw", "country": "Tanzania", "ip_address": "92.44.246.31", "email": "abrown@avamba.info"},
-            {"id": 2, "name": "Nelson", "country": "Kazakhstan", "ip_address": "112.238.42.121", "email": "jjordan@agivu.com"},
-            {"id": 3, "name": "Garcia", "country": "Madagascar", "ip_address": "39.211.252.103", "email": "jdean@skinte.biz"},
-            {"id": 4, "name": "Richardson", "country": "Somalia", "ip_address": "27.214.238.100", "email": "nblack@midel.gov"},
-            {"id": 5, "name": "Kennedy", "country": "Libya", "ip_address": "82.148.96.120", "email": "charrison@tambee.name"},
-            {"id": 6, "name": "Kennedy", "country": "Wallis and Futuna Islands", "ip_address": "127.253.48.108", "email": "cward@meevee.info"},
-            {"id": 7, "name": "Mills", "country": "Northern Mariana Islands", "ip_address": "173.172.137.141", "email": "gwebb@skimia.org"},
-            {"id": 8, "name": "Miller", "country": "Nauru", "ip_address": "108.91.41.115", "email": "rsanders@zoovu.edu"},
-            {"id": 9, "name": "Simmons", "country": "Papua New Guinea", "ip_address": "210.21.169.1", "email": "pevans@abata.com"},
-            {"id": 10, "name": "Mccoy", "country": "Mali", "ip_address": "90.184.77.113", "email": "ahughes@mybuzz.gov"}
-        ];
+    function widths() {
+        var lapsWidths = [];
+        if (self.type === self.RESULT_TYPE) {
+            comp.lapInfoArr.forEach(function () {
+                lapsWidths.push('auto');
+            });
+        }
+        var infoWidths = [];
+        comp.ptInfoArr.forEach(function () {
+            infoWidths.push('*');
+        });
+        var widths = ['auto', 'auto', 'auto'].concat(infoWidths).concat(lapsWidths);
+        if (self.type === self.RESULT_TYPE) {
+            widths.unshift('auto');
+            widths.push('auto');
+        }
+        return widths;
+    }
 
-        create('Sample', columns, data);
-    };
+    function footer() {
+        return function (currentPage, pageCount) {
+            return {
+                columns: [
+                    { text: $filter('date')(new Date(), 'yyyy-MM-dd HH:mm'), margin: [50, 10] },
+                    { text: 'Sida ' + currentPage + ' av ' + pageCount, alignment: 'right', margin: [50, 10]}
+                ]
+            };
+        };
+    }
+
+    function layout() {
+        return {
+            hLineWidth: function (i, node) {
+                if (i === 0 || i === node.table.body.length) return 0;
+                return 1;
+            },
+            vLineWidth: function (i) {
+                return 0;
+            },
+            hLineColor: function (i) {
+                return i === 1 ? 'black' : '#aaa';
+            },
+            paddingTop: function (i) {
+                return 2;
+            },
+            paddingBottom: function (i) {
+                return 2;
+            },
+            paddingLeft: function (i) {
+                return i === 0 ? 0 : 6;
+            },
+            paddingRight: function (i, node) {
+                return (i === node.table.widths.length - 1) ? 0 : 6;
+            }
+        };
+    }
+
+    function table(headers, data, widths) {
+        data.unshift(headers);
+        return {
+            headerRows: 1,
+            widths: widths,
+            body: data
+        };
+    }
 
 }]);
