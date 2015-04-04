@@ -1,2 +1,2 @@
-## Enduro Stopwatch
-A complete race stopwatch mainly developed for enduro.
+## Race Watch
+A competition stopwatch mainly developed for enduro.

@@ -1,8 +1,14 @@
 {
-    "name": "Enduro Stopwatch",
-    "description": "A stopwatch mainly for Enduro",
-    "version": "0.0.1",
+    "name": "Race Watch (Beta)",
+    "description": "A competition timer mainly for Enduro",
+    "version": "0.1",
+    "author": "Simon Bengtsson",
     "manifest_version": 2,
+
+    "icons": {
+        "16": "icon_16.png",
+        "128": "icon_128.png"
+    },
     "permissions": [
         {
             "fileSystem": ["write", "retainEntries", "directory"]
