@@ -10,7 +10,6 @@ angular.module("enduroApp").service("pdfgen", [
     this.RESULT_TYPE = "results";
 
     this.create = function (type) {
-      console.log("Hello!");
       self.type = type;
       var title =
         (type === self.RESULT_TYPE ? "Resultat " : "Startlista ") + comp.name;
@@ -42,7 +41,6 @@ angular.module("enduroApp").service("pdfgen", [
       });
       doc.putTotalPages(totalPagesExp);
       doc.output("dataurlnewwindow");
-      console.log("Hello2");
     };
 
     function headers() {
