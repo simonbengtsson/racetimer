@@ -1,26 +1,27 @@
 {
-    "name": "Race Watch (Beta)",
-    "description": "A competition timer mainly for Enduro",
-    "version": "0.1",
-    "author": "Simon Bengtsson",
-    "manifest_version": 2,
-
-    "icons": {
-        "16": "icon_16.png",
-        "128": "icon_128.png"
+  "theme_color": "#e74c3c",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "purpose": "maskable",
+      "sizes": "512x512",
+      "src": "icon512_maskable.png",
+      "type": "image/png"
     },
-    "permissions": [
-        {
-            "fileSystem": ["write", "retainEntries", "directory"]
-        },
-        "storage"
-    ],
-    "app": {
-        "background": {
-            "scripts": ["background.js"]
-        }
-    },
-    "sandbox": {
-        "pages": ["sandbox.html"]
+    {
+      "purpose": "any",
+      "sizes": "512x512",
+      "src": "icon512_rounded.png",
+      "type": "image/png"
     }
+  ],
+  "orientation": "any",
+  "display": "standalone",
+  "dir": "auto",
+  "lang": "en-GB",
+  "name": "Race Watch",
+  "short_name": "Race Watch",
+  "start_url": "/",
+  "scope": "/",
+  "id": "racewatchapp"
 }

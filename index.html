@@ -1,42 +1,47 @@
 <!DOCTYPE html>
 <html class="no-js">
+
 <head>
     <meta charset="utf-8">
     <title>RaceWatch</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#FFFFFF" />
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
     <link rel="stylesheet" href="bower_components/datatables/media/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="bower_components/angular/angular-csp.css">
     <link rel="stylesheet" href="bower_components/angular-hotkeys/build/hotkeys.min.css">
     <link rel="stylesheet" href="main.css">
 </head>
+
 <body ng-app="enduroApp" ng-csp>
 
-<div ng-controller="MainController" ng-include="'main.html'" class="main"></div>
+    <div ng-controller="MainController" ng-include="'main.html'" class="main"></div>
 
-<script src="bower_components/jquery/dist/jquery.js"></script>
-<script src="bower_components/angular/angular.js"></script>
-<script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
-<script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
-<script src="bower_components/angular-animate/angular-animate.js"></script>
-<script src="bower_components/angular-bootstrap/ui-bootstrap.js"></script>
-<script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
-<script src="bower_components/ng-file-upload/angular-file-upload.js"></script>
-<script src="bower_components/angular-hotkeys/build/hotkeys.js"></script>
-<script src='bower_components/pdfmake/build/pdfmake.js'></script>
-<script src='bower_components/pdfmake/build/vfs_fonts.js'></script>
-<script src='bower_components/Sortable/Sortable.js'></script>
-<script src='bower_components/ng-sortable/ng-sortable.js'></script>
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+    <script src="bower_components/angular-animate/angular-animate.js"></script>
+    <script src="bower_components/angular-bootstrap/ui-bootstrap.js"></script>
+    <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+    <script src="bower_components/ng-file-upload/angular-file-upload.js"></script>
+    <script src="bower_components/angular-hotkeys/build/hotkeys.js"></script>
+    <script src='bower_components/pdfmake/build/pdfmake.js'></script>
+    <script src='bower_components/pdfmake/build/vfs_fonts.js'></script>
+    <script src='bower_components/Sortable/Sortable.js'></script>
+    <script src='bower_components/ng-sortable/ng-sortable.js'></script>
 
-<script src="global.js"></script>
-<script src="bower_components/jspdf/dist/jspdf.debug.js"></script>
-<script src="main.js"></script>
-<script src="directives.js"></script>
-<script src="components/competition-service.js"></script>
-<script src="components/filters.js"></script>
-<script src="components/pdf-service.js"></script>
-<script src="plugins/autoTable/jspdf.plugin.autotable.js"></script>
+    <script src="global.js"></script>
+    <script src="bower_components/jspdf/dist/jspdf.debug.js"></script>
+    <script src="main.js"></script>
+    <script src="directives.js"></script>
+    <script src="components/competition-service.js"></script>
+    <script src="components/filters.js"></script>
+    <script src="components/pdf-service.js"></script>
+    <script src="plugins/autoTable/jspdf.plugin.autotable.js"></script>
 
 </body>
+
 </html>
